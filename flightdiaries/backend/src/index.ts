@@ -1,8 +1,15 @@
 import express from 'express';
+import cors from 'cors';
 import diaryRouter from './routes/diaries.ts';
 
 const app = express();
+const corsOptions: cors.CorsOptions = {
+  origin: 'http://localhost:5173',
+  optionsSuccessStatus: 200
+};
 app.use(express.json());
+// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+app.use(cors(corsOptions));
 
 const PORT = 3000;
 

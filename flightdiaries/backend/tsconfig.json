@@ -5,6 +5,7 @@
     "module": "nodenext",
     "esModuleInterop": true,
     "allowImportingTsExtensions": true,
+    "allowSyntheticDefaultImports": true,
     "strict" : true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
