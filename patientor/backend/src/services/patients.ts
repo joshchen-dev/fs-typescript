@@ -1,15 +1,17 @@
 import patientsData from '../../data/patients.ts';
 import { v1 as uuid } from 'uuid';
-import { NewPatientSchema, type NewPatient, type Patient } from '../types.ts';
+import type { NonSensitivePatinet, NewPatient, Patient, Entry } from '../types.ts';
+import { NewPatientSchema } from '../types.ts';
 
-const getEntries = (): Omit<Patient, 'ssn'>[] => {
-  return  patientsData.map((obj) => {
+const getEntries = (): NonSensitivePatinet[] => {
+  return patientsData.map((obj) => {
     const sensitiveSchema = NewPatientSchema.omit({ ssn: true });
     const validated = sensitiveSchema.parse(obj);
 
     return {
       ...validated,
-      id: obj.id
+      id: obj.id,
+      entries: obj.entries
     };
   });
 };
@@ -17,7 +19,8 @@ const getEntries = (): Omit<Patient, 'ssn'>[] => {
 const createEntry = (entry: NewPatient): Patient => {
   const newPatientEntry = {
     ...entry,
-    id: uuid()
+    id: uuid(),
+    entries: [] as Entry[]
   };
 
   patientsData.push(newPatientEntry);

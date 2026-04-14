@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import express from "express";
-import { NewPatientSchema, type Patient, type NewPatient } from "../types.ts";
+import type { NonSensitivePatinet , NewPatient } from "../types.ts";
+import { NewPatientSchema } from "../types.ts";
 import patientsService from "../services/patients.ts";
 import { z } from "zod";
 
@@ -23,7 +24,7 @@ const errorMiddleware = (error: unknown, _req: Request, res: Response, next: Nex
   }
 };
 
-patientsRouter.get('/', (_req, res: Response<Omit<Patient, "ssn">[]>) => {
+patientsRouter.get('/', (_req, res: Response<NonSensitivePatinet[]>) => {
   const data = patientsService.getEntries();
   res.send(data);
 });
@@ -39,6 +40,11 @@ patientsRouter.post('/', newPatientParser, (req: Request<unknown, unknown, NewPa
       res.status(400).send({ error: 'unknown error' });
     }
   }
+});
+
+patientsRouter.get('/:id', (req: Request, res: Response<NonSensitivePatinet>) => {
+  const patient = patientsService.getEntries().find(p => p.id === req.params.id);
+  res.json(patient);
 });
 
 patientsRouter.use(errorMiddleware);

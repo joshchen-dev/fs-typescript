@@ -6,18 +6,29 @@ export interface Diagnosis {
   latin?: string
 }
 
-// export interface Patient {
-//   id: string,
-//   name: string,
-//   dateOfBirth: string,
-//   ssn: string,
-//   gender: string,
-//   occupation: string
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+// export interface Entry {
+  
 // }
 
-export interface Patient extends NewPatient {
-  id: string
+export const EntrySchema = z.object({});
+export type Entry = z.infer<typeof EntrySchema>;
+
+export interface Patient {
+  id: string,
+  name: string,
+  dateOfBirth: string,
+  ssn: string,
+  gender: Gender,
+  occupation: string,
+  entries: Entry[]
 }
+
+export type NonSensitivePatinet = Omit<Patient, 'ssn' | 'entries'>;
+
+// export interface Patient extends NewPatient {
+//   id: string
+// }
 
 export const Gender = {
   Male: 'male',
@@ -32,7 +43,8 @@ export const NewPatientSchema = z.object({
   dateOfBirth: z.iso.date(),
   ssn: z.string(),
   gender: z.enum(Gender),
-  occupation: z.string()
+  occupation: z.string(),
+  // entries: z.array(EntrySchema)
 });
 
 export type NewPatient = z.infer<typeof NewPatientSchema>;
