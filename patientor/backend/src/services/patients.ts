@@ -1,24 +1,15 @@
 import patientsData from '../../data/patients.ts';
 import { v1 as uuid } from 'uuid';
-import type { NonSensitivePatinet, NewPatient, Patient, Entry } from '../types.ts';
-import { NewPatientSchema } from '../types.ts';
+import type { NewPatient, Patient, Entry, NewEntry } from '../types.ts';
+import { NewEntrySchema, PatientSchema } from '../types.ts';
 
-const getEntries = (): NonSensitivePatinet[] => {
-  return patientsData.map((obj) => {
-    const sensitiveSchema = NewPatientSchema.omit({ ssn: true });
-    const validated = sensitiveSchema.parse(obj);
-
-    return {
-      ...validated,
-      id: obj.id,
-      entries: obj.entries
-    };
-  });
+const getPatients = (): Patient[] => {
+  return patientsData.map((obj) => PatientSchema.parse(obj));
 };
 
-const createEntry = (entry: NewPatient): Patient => {
+const createPatient = (patient: NewPatient): Patient => {
   const newPatientEntry = {
-    ...entry,
+    ...patient,
     id: uuid(),
     entries: [] as Entry[]
   };
@@ -27,7 +18,25 @@ const createEntry = (entry: NewPatient): Patient => {
   return newPatientEntry;
 };
 
+const createEntry = (patientId: string, entry: NewEntry): Patient => {
+  const targetPatinet = patientsData.find(p => p.id === patientId);
+
+  if (!targetPatinet) {
+    throw new Error('target patinet not found');
+  }
+
+  const validated = NewEntrySchema.parse(entry);
+  const newEntry = {
+    ...validated,
+    id: uuid()
+  };
+  targetPatinet.entries = targetPatinet.entries.concat(newEntry);
+
+  return targetPatinet;
+};
+
 export default {
-  getEntries,
+  getPatients,
+  createPatient,
   createEntry
 };

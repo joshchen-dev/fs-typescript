@@ -1,9 +1,22 @@
 GET http://localhost:3001/api/diagnoses
 
 ###
-
-GET http://localhost:3001/api/patients
+`GET http://localhost:3001/api/patients
 
 ###
 
 GET http://localhost:3001/api/patients/d2773336-f723-11e9-8f0b-362b9e155667
+
+###
+
+POST http://localhost:3001/api/patients/d2773c6e-f723-11e9-8f0b-362b9e155667/entries
+Content-Type: application/json
+
+{
+  "type": "HealthCheck",
+  "description": "This is a test entry.",
+  "date": "2020-02-02",
+  "specialist": "Gregory House",
+  "diagnosisCodes": ["123", "456"],
+  "healthCheckRating": 2
+}
