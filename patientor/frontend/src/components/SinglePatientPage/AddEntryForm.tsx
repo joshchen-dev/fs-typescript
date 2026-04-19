@@ -1,7 +1,8 @@
-import { Button, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
-import React, { useState } from "react";
+import { Box, Button, Chip, FormControl, InputLabel, MenuItem, OutlinedInput, Select, TextField } from "@mui/material";
+import React, { useEffect, useState } from "react";
 import patinetsService from "../../services/patients";
-import { BaseEntry, EntryFormValues, Patient } from "../../types";
+import diagnosesService from "../../services/diagnoses";
+import { BaseEntry, Diagnosis, EntryFormValues, Patient } from "../../types";
 import axios, { AxiosError } from "axios";
 import Notification from "./Notification";
 import { JSX } from "@emotion/react/jsx-runtime";
@@ -19,9 +20,19 @@ interface Props {
 }
 
 const HealthCheckFormContent = (): JSX.Element => {
+  const [rating, setRating] = useState<number>(0);
+
   return (
     <div>
-      <div style={away}><TextField name="rating" label="Health Check Rating (0-3)" required fullWidth /></div>
+      <FormControl sx={{ m: 1, minWidth: 200 }} style={away}>
+        <InputLabel id="health-rating-label">Health Check Rating</InputLabel>
+        <Select labelId="health-rating" name="rating" label="Health Check Rating" value={rating} onChange={(event) => setRating(event.target.value)} >
+          <MenuItem value={0}>0 — Healthy</MenuItem>
+          <MenuItem value={1}>1 — Low Risk</MenuItem>
+          <MenuItem value={2}>2 — High Risk</MenuItem>
+          <MenuItem value={3}>3 — Critical Risk</MenuItem>
+        </Select>
+      </FormControl>
     </div>
   );
 };
@@ -39,7 +50,8 @@ const OccupationalHealthcareFormContent = (): JSX.Element => {
 const HospitalFormContent = (): JSX.Element => {
   return (
     <div>
-      <div style={away}><TextField name="dischargeDate" label="Discharge Date" required fullWidth /></div>
+      {/* <div style={away}><TextField name="dischargeDate" label="Discharge Date" required fullWidth /></div> */}
+      <div style={away}><TextField type="date" name="dischargeDate" label="Discharge Date" required fullWidth slotProps={{ inputLabel: { shrink: true } }} /></div>
       <div style={away}><TextField name="dischargeCriteria" label="Discharge Criteria" required fullWidth /></div>
     </div>
   );
@@ -47,6 +59,17 @@ const HospitalFormContent = (): JSX.Element => {
 
 const AddEntryForm = ({ patients, setPatients, patient, error, setError }: Props) => {
   const [type, setType] = useState<'HealthCheck' | 'Hospital' | 'OccupationalHealthcare'>('HealthCheck');
+  const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([]);
+  const [code, setCode] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchDiagnoses = async () => {
+      const res = await diagnosesService.getAll();
+      setDiagnoses(res);
+    };
+
+    fetchDiagnoses();
+  }, []);
 
   const submit = async (event: React.SyntheticEvent) => {
     event.preventDefault();
@@ -121,7 +144,7 @@ const AddEntryForm = ({ patients, setPatients, patient, error, setError }: Props
 
   return (
     <form style={{ border: "solid grey", borderRadius: "10px", padding: "10px" }} onSubmit={submit}>
-      <h2>New HealthCheck Entry</h2>
+      <h2>New Entry</h2>
       <Notification error={error} />
       <div>
         <FormControl sx={{ m: 1, minWidth: 200 }} style={away}>
@@ -134,15 +157,44 @@ const AddEntryForm = ({ patients, setPatients, patient, error, setError }: Props
             <MenuItem value="Hospital">Hospital</MenuItem>
           </Select>
         </FormControl>
-        <div style={away}><TextField name="date" label="Date" required fullWidth /></div>
+        <div style={away}><TextField type="date" name="date" label="Date" required fullWidth slotProps={{ inputLabel: { shrink: true } }} /></div>
         <div style={away}><TextField name="description" label="Description" required fullWidth /></div>
         <div style={away}><TextField name="specialist" label="Specialist" required fullWidth /></div>
-        <div style={away}><TextField name="code" label="Diagnosis Codes (comma-separated)" fullWidth /></div>
+        {/* <div style={away}><TextField name="code" label="Diagnosis Codes (comma-separated)" fullWidth /></div> */}
+        <div>
+          <FormControl fullWidth>
+            <InputLabel>Diagnosis Code</InputLabel>
+            <Select
+              multiple
+              value={code}
+              name="code"
+              onChange={event => setCode(typeof event.target.value === 'string'
+                ? event.target.value.split(",")
+                : event.target.value
+              )}
+              input={<OutlinedInput label="Chip" />}
+              renderValue={selected => (
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                  {selected.map(value => <Chip key={value} label={value} />)}
+                </Box>
+              )}
+            >
+              {diagnoses?.map(diagnosis => (
+                <MenuItem key={diagnosis.code} value={diagnosis.code}>
+                  {diagnosis.code} — {diagnosis.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </div>
+        <FormControl sx={{ m: 1, width: 300 }}>
+
+        </FormControl>
         {type === "HealthCheck" && <HealthCheckFormContent />}
         {type === "OccupationalHealthcare" && <OccupationalHealthcareFormContent />}
         {type === "Hospital" && <HospitalFormContent />}
       </div>
-      <Button variant="contained" type="submit">create</Button>
+      <Button variant="contained" type="submit">Add New Entry</Button>
     </form>
   );
 };

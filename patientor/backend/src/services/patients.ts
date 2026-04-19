@@ -30,6 +30,9 @@ const createEntry = (patientId: string, entry: NewEntry): Patient => {
     ...validated,
     id: uuid()
   };
+  if (targetPatinet.entries === undefined) {
+    targetPatinet.entries = [];
+  }
   targetPatinet.entries = targetPatinet.entries.concat(newEntry);
 
   return targetPatinet;

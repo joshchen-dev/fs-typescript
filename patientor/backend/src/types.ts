@@ -74,7 +74,7 @@ export interface Patient {
   ssn: string;
   gender: Gender;
   occupation: string;
-  entries: Entry[]
+  entries?: Entry[]
 }
 
 export type NonSensitivePatinet = Omit<Patient, 'ssn' | 'entries'>;
@@ -93,7 +93,7 @@ export const NewPatientSchema = z.object({
   ssn: z.string(),
   gender: z.enum(Gender),
   occupation: z.string(),
-  entries: z.array(EntrySchema)
+  entries: z.array(EntrySchema).optional()
 });
 
 export type NewPatient = z.infer<typeof NewPatientSchema>;
